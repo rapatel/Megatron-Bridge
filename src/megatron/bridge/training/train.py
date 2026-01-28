@@ -1303,9 +1303,18 @@ def _handle_mxfp8_param_buffer_copy(
         overlap_param_gather: Config flag for overlapping param gathering
     """
     if reuse_grad_buf_for_mxfp8_param_ag and overlap_param_gather:
-        for optim_instance in optimizer.chained_optimizers:
-            if isinstance(optim_instance, DistributedOptimizer):
-                optim_instance._copy_main_params_to_param_buffer()
+        # Handle both ChainedOptimizer and direct DistributedOptimizer cases
+        # Note: FSDP's DistributedOptimizer doesn't have shard_fp32_from_float16_groups,
+        # so we check for this attribute before calling _copy_main_params_to_param_buffer
+        def _try_copy_main_params(opt):
+            if isinstance(opt, DistributedOptimizer) and hasattr(opt, 'shard_fp32_from_float16_groups'):
+                opt._copy_main_params_to_param_buffer()
+
+        if hasattr(optimizer, 'chained_optimizers'):
+            for optim_instance in optimizer.chained_optimizers:
+                _try_copy_main_params(optim_instance)
+        else:
+            _try_copy_main_params(optimizer)
 
 
 def _delete_cuda_graphs(cuda_graph_helper: TECudaGraphHelper):
