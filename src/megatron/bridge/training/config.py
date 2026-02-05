@@ -1475,14 +1475,14 @@ class ConfigContainer(Container):
                     "Megatron FSDP only supports fsdp_dtensor checkpoint format"
                 )
 
-            if self.ddp.average_in_collective:
-                print_rank_0("average_in_collective is not supported with Megatron FSDP, setting to True")
-                self.ddp.average_in_collective = False
+            #if self.ddp.average_in_collective:
+            #    print_rank_0("average_in_collective is not supported with Megatron FSDP, setting to True")
+            #    self.ddp.average_in_collective = False
 
-            # TODO: This can be removed once NVIDIA/TransformerEngine#2371 is available to use
-            if self.model.gradient_accumulation_fusion:
-                print_rank_0("Gradient accumulation fusion is not supported with Megatron FSDP, setting to False")
-                self.model.gradient_accumulation_fusion = False
+            ## TODO: This can be removed once NVIDIA/TransformerEngine#2371 is available to use
+            #if self.model.gradient_accumulation_fusion:
+            #    print_rank_0("Gradient accumulation fusion is not supported with Megatron FSDP, setting to False")
+            #    self.model.gradient_accumulation_fusion = False
 
             # reuse_grad_buf_for_mxfp8_param_ag is not supported with Megatron FSDP
             if self.ddp.reuse_grad_buf_for_mxfp8_param_ag:
